@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Color Selector</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            transition: background-color 0.5s;
+        }
+        select {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Select a Theme Color</h1>
+    <p>Select your preferred background color:</p>
+    <select id="colorSelect">
+        <option value="white">White</option>
+        <option value="lightblue">Light Blue</option>
+        <option value="lightgreen">Light Green</option>
+        <option value="lightcoral">Light Coral</option>
+        <option value="lightyellow">Light Yellow</option>
+    </select>
+
+    <script>
+        // Function to set the background color
+        function setBackgroundColor(color) {
+            document.body.style.backgroundColor = color;
+            localStorage.setItem('bgColor', color); // Save color in localStorage
+        }
+
+        // Get color from localStorage
+        const savedColor = localStorage.getItem('bgColor');
+        if (savedColor) {
+            setBackgroundColor(savedColor); // Apply saved color
+        }
+
+        // Event listener for color selection
+        document.getElementById('colorSelect').addEventListener('change', function() {
+            setBackgroundColor(this.value);
+        });
+    </script>
+
+</body>
+</html>

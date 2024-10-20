@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline Page with Service Worker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+            transition: background-color 0.5s;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Welcome to My Offline Webpage</h1>
+    <p>This page can be accessed even when you are offline!</p>
+    <button id="colorButton">Select a Theme Color</button>
+    <select id="colorSelect" style="display:none;">
+        <option value="white">White</option>
+        <option value="lightblue">Light Blue</option>
+        <option value="lightgreen">Light Green</option>
+        <option value="lightcoral">Light Coral</option>
+        <option value="lightyellow">Light Yellow</option>
+    </select>
+
+    <script>
+        // Function to set the background color
+        function setBackgroundColor(color) {
+            document.body.style.backgroundColor = color;
+            localStorage.setItem('bgColor', color); // Save color in localStorage
+        }
+
+        // Get color from localStorage
+        const savedColor = localStorage.getItem('bgColor');
+        if (savedColor) {
+            setBackgroundColor(savedColor); // Apply saved color
+        }
+
+        // Event listener for color selection
+        document.getElementById('colorButton').addEventListener('click', function() {
+            const colorSelect = document.getElementById('colorSelect');
+            colorSelect.style.display = 'block'; // Show the color select dropdown
+            colorSelect.addEventListener('change', function() {
+                setBackgroundColor(this.value);
+            });
+        });
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('data:application/javascript;base64,' + btoa(`
+                    const CACHE_NAME = 'my-site-cache-v1';
+                    const urlsToCache = [
+                        '/',
+                        'data:text/html;charset=utf-8,' + encodeURIComponent(document.documentElement.outerHTML)
+                    ];
+
+                    self.addEventListener('install', function(event) {
+                        event.waitUntil(
+                            caches.open(CACHE_NAME)
+                                .then(function(cache) {
+                                    console.log('Caching files');
+                                    return cache.addAll(urlsToCache);
+                                })
+                        );
+                    });
+
+                    self.addEventListener('fetch', function(event) {
+                        event.respondWith(
+                            caches.match(event.request)
+                                .then(function(response) {
+                                    return response || fetch(event.request);
+                                })
+                        );
+                    });
+                `))
+                .then(function(registration) {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                })
+                .catch(function(error) {
+                    console.error('Service Worker registration failed:', error);
+                });
+            });
+        }
+    </script>
+
+</body>
+</html>
